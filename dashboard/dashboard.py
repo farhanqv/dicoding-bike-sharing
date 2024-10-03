@@ -5,7 +5,7 @@ import streamlit as st
 from scipy.stats import linregress
 sns.set(style='dark')
 
-all_main_df = pd.read_csv("main_data.csv")
+all_main_df = pd.read_csv("./dashboard/main_data.csv")
 
 datetime_columns = ["dteday"]
 
@@ -31,6 +31,7 @@ main_df = all_main_df[(all_main_df["dteday"] >= str(start_date)) &
 
 
 st.header('BikeSharing Dashboard')
+
 
 st.subheader('Daily Rentals')
  
@@ -116,6 +117,16 @@ ax.tick_params(axis='x', labelsize=35)
 ax.tick_params(axis='y', labelsize=30)
 st.pyplot(fig)
 
+st.subheader("Total Rental Bikes by Season and Year")
+
+aggregated_season_df = all_main_df.groupby(['season_label', 'yr_label'], as_index=False, observed=False)['cnt'].sum()
+
+plt.figure(figsize=(10, 6))
+sns.barplot(data=aggregated_season_df, x="season_label", y="cnt", hue="yr_label", errorbar=None)
+plt.xlabel("Season")
+plt.ylabel("Total Rental Bikes")
+
+st.pyplot(plt)
 
 st.subheader('Bike Rentals Analysis')
 
@@ -125,13 +136,13 @@ tab1, tab2 = st.tabs(["Temperature vs. Rentals", "Feels-Like Temperature vs. Ren
 with tab1:
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.set_title("Average Total Bike Rentals vs. Temperature", loc="center", fontsize=15)
-    sns.scatterplot(data=main_df, x='temp_actual', y='cnt', ax=ax, color='blue', alpha=0.6)
+    sns.scatterplot(data=all_main_df, x='temp_actual', y='cnt', ax=ax, color='blue', alpha=0.6)
     ax.set_xlabel('Temperature (°C)')
     ax.set_ylabel('Avg. Total Rentals')
 
     # Add a regression line
-    slope, intercept, r_value, p_value, std_err = linregress(main_df['temp_actual'], main_df['cnt'])
-    ax.plot(main_df['temp_actual'], slope * main_df['temp_actual'] + intercept, color='red', label='Trend Line')
+    slope, intercept, r_value, p_value, std_err = linregress(all_main_df['temp_actual'], all_main_df['cnt'])
+    ax.plot(all_main_df['temp_actual'], slope * all_main_df['temp_actual'] + intercept, color='red', label='Trend Line')
     ax.legend()
 
     st.pyplot(fig)
@@ -140,13 +151,13 @@ with tab1:
 with tab2:
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.set_title("Average Total Bike Rentals vs. Feels-Like Temperature", loc="center", fontsize=15)
-    sns.scatterplot(data=main_df, x='atemp_actual', y='cnt', ax=ax, color='green', alpha=0.6)
+    sns.scatterplot(data=all_main_df, x='atemp_actual', y='cnt', ax=ax, color='green', alpha=0.6)
     ax.set_xlabel('Feels-Like Temperature (°C)')
     ax.set_ylabel('Avg. Total Rentals')
 
     # Add a regression line
-    slope, intercept, r_value, p_value, std_err = linregress(main_df['atemp_actual'], main_df['cnt'])
-    ax.plot(main_df['atemp_actual'], slope * main_df['atemp_actual'] + intercept, color='red', label='Trend Line')
+    slope, intercept, r_value, p_value, std_err = linregress(all_main_df['atemp_actual'], all_main_df['cnt'])
+    ax.plot(all_main_df['atemp_actual'], slope * all_main_df['atemp_actual'] + intercept, color='red', label='Trend Line')
     ax.legend()
 
     st.pyplot(fig)
